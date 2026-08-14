@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Logowanie — ZyskajNaBank</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <!-- header will be loaded here -->
+  <div data-include="/components/header.html"></div>
+
+  <div class="wrap">
+    <div class="card" role="main" aria-labelledby="loginTitle">
+      <div class="brand">
+        <div class="logo">ZN</div>
+        <div>
+          <h1 id="loginTitle">Zaloguj się — ZyskajNaBank</h1>
+          <p class="p-lead">Dostęp do promocji bankowych i Twojego panelu.</p>
+        </div>
+      </div>
+
+      <form id="loginForm" aria-describedby="msg">
+        <label for="email">Email</label>
+        <input id="email" class="input" type="email" name="email" placeholder="adres@mail.com" required />
+
+        <label for="password">Hasło</label>
+        <input id="password" class="input" type="password" name="password" placeholder="Twoje hasło" required />
+
+        <div class="row" style="justify-content:space-between;align-items:center;margin-top:6px;">
+          <button class="btn primary" type="submit">Zaloguj</button>
+          <a class="btn ghost" href="/register.html" role="button">Zarejestruj się</a>
+        </div>
+      </form>
+
+      <div class="or">lub kontynuuj przez</div>
+
+      <div class="google-wrap">
+        <div id="g_id_onload"
+             data-client_id="861925788590-d6u2bjm34udonj0p0rthkf78kk0koskr.apps.googleusercontent.com"
+             data-callback="handleCredentialResponse"></div>
+        <div class="g_id_signin" data-type="standard"></div>
+      </div>
+
+      <div id="msg" class="hint" role="status" aria-live="polite"></div>
+
+      <div class="footer-links">
+        <a href="/">Strona główna</a>
+        <a href="/profile.html">Profil</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- footer will be loaded here -->
+  <div data-include="/components/footer.html"></div>
+
+  <script src="/js/include-components.js"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="/js/auth.js"></script>
+  <script>
+    const form = document.getElementById('loginForm');
+    const msg = document.getElementById('msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      try {
+        const res = await fetch('/php/login.php', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: fd.get('email'), password: fd.get('password') })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Błąd logowania');
+        window.location.href = '/index.html';
+      } catch (err) {
+        msg.textContent = err.message || 'Błąd';
+      }
+    });
+
+    async function handleCredentialResponse(response) {
+      try {
+        const res = await fetch('/php/google_signin.php', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ id_token: response.credential })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Błąd logowania Google');
+        window.location.href = '/index.html';
+      } catch (err) {
+        msg.textContent = err.message || 'Błąd logowania Google';
+      }
+    }
+  </script>
+</body>
+</html>
