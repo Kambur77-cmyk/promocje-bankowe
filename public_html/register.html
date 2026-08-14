@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Rejestracja — ZyskajNaBank</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main style="max-width:640px;margin:2rem auto;font-family:Arial,Helvetica,sans-serif;">
+    <h1>Rejestracja</h1>
+    <form id="registerForm">
+      <input type="text" name="name" placeholder="Imię i nazwisko" required />
+      <input type="email" name="email" placeholder="Email" required />
+      <input type="password" name="password" placeholder="Hasło" required minlength="6" />
+      <button type="submit">Zarejestruj się</button>
+    </form>
+
+    <hr />
+
+    <h2>Lub zaloguj przez Google</h2>
+    <div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID" data-login_uri="/php/google_signin.php"></div>
+    <div class="g_id_signin" data-type="standard"></div>
+
+    <p id="msg"></p>
+    <p><a href="/">Powrót</a></p>
+  </main>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="/public_html/js/auth.js"></script>
+  <script>
+    const form = document.getElementById('registerForm');
+    const msg = document.getElementById('msg');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      const user = {
+        email: fd.get('email'),
+        password: fd.get('password'),
+        displayName: fd.get('name') || fd.get('email')
+      };
+      try {
+        const res = await fetch('/php/register.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(user)
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Błąd');
+        msg.textContent = 'Zarejestrowano. Przekierowanie...';
+        window.location.href = '/profile.html';
+      } catch (err) {
+        msg.textContent = err.message;
+      }
+    });
+  </script>
+</body>
+</html>

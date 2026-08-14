@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Logowanie — ZyskajNaBank</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main style="max-width:640px;margin:2rem auto;font-family:Arial,Helvetica,sans-serif;">
+    <h1>Logowanie</h1>
+    <form id="loginForm">
+      <input type="email" name="email" placeholder="Email" required />
+      <input type="password" name="password" placeholder="Hasło" required />
+      <button type="submit">Zaloguj</button>
+    </form>
+
+    <hr />
+
+    <h2>Lub</h2>
+    <div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID" data-login_uri="/php/google_signin.php"></div>
+    <div class="g_id_signin" data-type="standard"></div>
+
+    <p id="msg"></p>
+    <p><a href="/">Powrót</a></p>
+  </main>
+
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="/public_html/js/auth.js"></script>
+  <script>
+    const form = document.getElementById('loginForm');
+    const msg = document.getElementById('msg');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(form);
+      try {
+        const res = await fetch('/php/login.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: fd.get('email'), password: fd.get('password') })
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Błąd');
+        window.location.href = '/profile.html';
+      } catch (err) {
+        msg.textContent = err.message || 'Błąd';
+      }
+    });
+  </script>
+</body>
+</html>
