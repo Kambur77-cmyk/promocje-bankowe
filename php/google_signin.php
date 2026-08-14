@@ -12,6 +12,7 @@ if (!$id_token) {
   exit;
 }
 
+// Szybka weryfikacja przez tokeninfo (produkcyjnie: weryfikuj JWT biblioteką)
 $verifyUrl = "https://oauth2.googleapis.com/tokeninfo?id_token=" . urlencode($id_token);
 $resp = @file_get_contents($verifyUrl);
 if ($resp === false) {
